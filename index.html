@@ -269,7 +269,7 @@
         "de", "la", "el", "los", "las", "un", "una", "unos", "unas", "y", "o", "u",
         "que", "como", "cuando", "donde", "para", "por", "con", "sin", "sobre",
         "al", "del", "se", "es", "son", "ser", "su", "sus", "en", "a", "ya", "si",
-        "qué", "cuál", "cuáles", "quien", "quienes", "este", "esta", "estos", "estas",
+        "cual", "quien", "quienes", "este", "esta", "estos", "estas",
     ]);
 
     const questionBank = buildQuestionBank(rawQuestionBank, rawTheoryText);
@@ -303,9 +303,77 @@
     function normalizeText(text) {
         return text
             .toLowerCase()
+            .normalize("NFD")
+            .replace(/[\u0300-\u036f]/g, "")
             .replace(/[¿?.,;:()]/g, " ")
             .replace(/\s+/g, " ")
             .trim();
+    }
+
+    const MODULE_RULES = [
+        {
+            name: "Módulo I: Equipos de Protección",
+            keywords: [
+                "epp", "equipo de proteccion", "uniforme", "credencial", "cinto",
+                "chaleco", "casco", "blindaje", "vidrio blindado", "vehiculo blindado",
+                "compartimento", "compartimiento", "blindado",
+            ],
+        },
+        {
+            name: "Módulo II: Operaciones de Seguridad",
+            keywords: ["vigilancia", "contravigilancia", "rutas", "analisis de rutas"],
+        },
+        {
+            name: "Módulo III: Seguridad Ciudadana",
+            keywords: [
+                "seguridad ciudadana", "seguridad humana", "derechos humanos",
+                "violencia", "policia comunitaria", "ecu 911", "sise", "sissecu",
+            ],
+        },
+        {
+            name: "Módulo IV: Normativa Vigente",
+            keywords: [
+                "ley", "coip", "art", "articulo", "licencia", "transito",
+                "contravencion", "delito", "flagrancia", "tenencia", "porte",
+            ],
+        },
+        {
+            name: "Módulo V: Protección VIP y Custodia",
+            keywords: [
+                "vip", "escolta", "custodia", "convoy", "carga critica",
+                "transporte de valores", "portavalor", "caravana",
+            ],
+        },
+        {
+            name: "Módulo VI: Comunicaciones e Información",
+            keywords: [
+                "radio", "comunicacion", "gps", "gprs", "gsm", "umts",
+                "indicativos", "contrasenas", "codigos", "confidencialidad",
+                "integridad", "disponibilidad", "informacion",
+            ],
+        },
+        {
+            name: "Módulo VII: Manejo de Crisis",
+            keywords: ["crisis", "emergencia", "comite de crisis", "accion adaptativa"],
+        },
+        {
+            name: "Módulo VIII: Práctica de Tiro",
+            keywords: [
+                "arma de fuego", "arma", "revólver", "revolver", "pistola",
+                "escopeta", "tiro", "punteria", "disparo", "cañon", "canon",
+                "recamara", "gatillo",
+            ],
+        },
+    ];
+
+    function categorizeQuestion(text) {
+        const normalized = normalizeText(text);
+        for (const rule of MODULE_RULES) {
+            if (rule.keywords.some((keyword) => normalized.includes(keyword))) {
+                return rule.name;
+            }
+        }
+        return "Banco Nivel II";
     }
 
     function extractKeywords(text) {
@@ -389,7 +457,7 @@
             t: questionText,
             ops: options,
             ans: correctOption ? correctOption.text : `Respuesta ${answerLetter}`,
-            cat: "Banco Nivel II",
+            cat: categorizeQuestion(questionText),
             exp: "",
         };
     }
