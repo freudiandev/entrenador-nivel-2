@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Entrenador Táctico de Seguridad Nivel II</title>
+    <style>
+        :root {
+            --bg-color: #f0f2f5;
+            --card-bg: #ffffff;
+            --primary: #003366; /* Azul policial */
+            --secondary: #d4af37; /* Dorado seguridad */
+            --text: #1c1e21;
+            --success: #2e7d32;
+            --error: #c62828;
+            --font-main: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            font-family: var(--font-main);
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 850px;
+            background: var(--card-bg);
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Header */
+        header {
+            background: var(--primary);
+            color: white;
+            padding: 20px;
+            text-align: center;
+            border-bottom: 4px solid var(--secondary);
+        }
+        
+        h1 { margin: 0; font-size: 1.5rem; text-transform: uppercase; letter-spacing: 1px; }
+        .stats-bar {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 20px;
+            background: #e3e6e8;
+            font-weight: bold;
+            font-size: 0.9rem;
+            color: var(--primary);
+        }
+
+        /* Pantallas */
+        .screen { display: none; padding: 20px; animation: fadeIn 0.4s ease-in; }
+        .screen.active { display: block; }
+        
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Pregunta */
+        .question-card {
+            margin-bottom: 20px;
+        }
+        .category-tag {
+            background: var(--secondary);
+            color: var(--primary);
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            font-weight: bold;
+            display: inline-block;
+            margin-bottom: 10px;
+        }
+        .question-text {
+            font-size: 1.2rem;
+            line-height: 1.5;
+            color: var(--text);
+            font-weight: 600;
+        }
+
+        /* Opciones */
+        .options-grid {
+            display: grid;
+            gap: 12px;
+        }
+        .option-btn {
+            background: white;
+            border: 2px solid #ddd;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: left;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 1rem;
+            position: relative;
+        }
+        .option-btn:hover:not(.disabled) {
+            border-color: var(--primary);
+            background: #f8fbff;
+        }
+        .option-btn.disabled { cursor: default; }
+        
+        /* Estados de respuesta */
+        .option-btn.correct { background: #e8f5e9; border-color: var(--success); color: var(--success); }
+        .option-btn.wrong { background: #ffebee; border-color: var(--error); color: var(--error); }
+        
+        .feedback-area {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 8px;
+            background: #e3f2fd;
+            border-left: 5px solid var(--primary);
+            display: none;
+        }
+        .feedback-area.error-mode {
+            background: #ffebee;
+            border-left-color: var(--error);
+        }
+
+        /* Botones de control */
+        .controls {
+            margin-top: 20px;
+            text-align: right;
+        }
+        .btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            font-size: 1rem;
+            cursor: pointer;
+            text-transform: uppercase;
+            font-weight: bold;
+            transition: background 0.3s;
+        }
+        .btn:hover { background: #004c99; }
+        .btn-restart { background: var(--error); }
+        .btn-restart:hover { background: #b71c1c; }
+
+        /* Resultados */
+        .result-box { text-align: center; padding: 40px 20px; }
+        .score-display { font-size: 4rem; font-weight: bold; color: var(--primary); margin: 20px 0; }
+        .score-display.fail { color: var(--error); }
+        
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>🛡️ Simulador Nivel II: Seguridad Privada</h1>
+    </header>
+    
+    <div class="stats-bar" id="stats-bar" style="display:none;">
+        <span id="progress-text">Pregunta 1/X</span>
+        <span id="score-text">Puntaje: 0</span>
+    </div>
+
+    <div id="screen-start" class="screen active">
+        <div style="text-align: center; padding: 40px;">
+            <h2>Entrenamiento Táctico Intensivo</h2>
+            <p>Este simulador contiene preguntas del Banco Oficial. El sistema <strong>aleatoriza</strong> tanto el orden de las preguntas como las opciones de respuesta para garantizar un aprendizaje real y no por memoria visual.</p>
+            <br>
+            <div style="background: #e8f5e9; padding: 15px; border-radius: 8px; display: inline-block; text-align: left;">
+                <strong>Reglas del Juego:</strong>
+                <ul style="margin: 10px 0 0 20px;">
+                    <li>Debes completar todas las preguntas.</li>
+                    <li>Las opciones cambiarán de lugar cada vez.</li>
+                    <li>Nota mínima para aprobar: <strong>80%</strong>.</li>
+                    <li>Si fallas, se mostrará la justificación teórica.</li>
+                </ul>
+            </div>
+            <br><br>
+            <button class="btn" onclick="startQuiz()">Iniciar Entrenamiento</button>
+        </div>
+    </div>
+
+    <div id="screen-quiz" class="screen">
+        <div class="question-card">
+            <span class="category-tag" id="q-category">CATEGORÍA</span>
+            <div class="question-text" id="q-text">
+                </div>
+        </div>
+
+        <div class="options-grid" id="options-container">
+            </div>
+
+        <div class="feedback-area" id="feedback">
+            <h4 style="margin: 0 0 10px 0;">Análisis de Respuesta:</h4>
+            <p id="feedback-msg"></p>
+            <div class="controls">
+                <button class="btn" id="next-btn" onclick="nextQuestion()">Siguiente ➤</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="screen-result" class="screen">
+        <div class="result-box">
+            <h2 id="result-title">Resultado Final</h2>
+            <div class="score-display" id="final-score">0/20</div>
+            <p id="result-msg" style="font-size: 1.2rem;">Mensaje</p>
+            <br>
+            <button class="btn btn-restart" onclick="location.reload()">Reiniciar Entrenamiento</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    /* =================================================================
+       BASE DE DATOS DE PREGUNTAS (EXTRACTO ROBUSTO DEL BANCO OFICIAL)
+       Nota: Se han seleccionado preguntas representativas de todos los módulos
+       para asegurar la funcionalidad sin exceder límites de código.
+       ================================================================= */
+    const questionBank = [
+        // --- CRISIS Y EMERGENCIAS ---
+        {
+            t: "¿Acción Adaptativa es?",
+            ops: ["Es la que se toma cuando nada se puede hacer y consiste en aprender a vivir con la crisis", "Una acción preventiva", "Una acción correctiva inmediata", "Una acción de eliminación de riesgo"],
+            ans: "Es la que se toma cuando nada se puede hacer y consiste en aprender a vivir con la crisis",
+            cat: "Manejo de Crisis",
+            exp: "La Acción Adaptativa (ej. ante desastres naturales) implica ajustarse a una realidad inevitable cuando no se puede prevenir ni corregir."
+        },
+        {
+            t: "¿Acción Contingente se denomina así porque se trata de una acción?",
+            ops: ["Temporal o pasajera", "Permanente", "Definitiva", "Estratégica a largo plazo"],
+            ans: "Temporal o pasajera",
+            cat: "Manejo de Crisis",
+            exp: "Es una medida 'parche' o de reserva (como un generador eléctrico) que no soluciona la causa raíz."
+        },
+        {
+            t: "¿Crisis es una situación?",
+            ops: ["Compleja y decisiva, producida por sorpresa", "Rutinaria y esperada", "Administrativa simple", "De bajo impacto"],
+            ans: "Compleja y decisiva, producida por sorpresa",
+            cat: "Manejo de Crisis",
+            exp: "La crisis se caracteriza por la sorpresa, la amenaza a los objetivos y la necesidad de respuesta rápida."
+        },
+        // --- ARMAS Y TIRO ---
+        {
+            t: "¿Antes de utilizar un arma de fuego y como rutina, debe asegurarse de que la misma esté?",
+            ops: ["Con el cañón limpio por completo", "Cargada al máximo", "Con el seguro fuera", "Engrasada en exceso"],
+            ans: "Con el cañón limpio por completo",
+            cat: "Armamento",
+            exp: "Un cañón obstruido puede causar una explosión del arma al disparar. Es una norma de seguridad vital."
+        },
+        {
+            t: "¿Arma de fuego automática diseñada para ser empleada por ambas manos, que posee selector de fuego?",
+            ops: ["Subametralladora", "Pistola", "Revólver", "Escopeta"],
+            ans: "Subametralladora",
+            cat: "Armamento",
+            exp: "La subametralladora es un arma automática de mayor capacidad de fuego que una pistola, diseñada para uso a dos manos."
+        },
+        {
+            t: "¿Cuál NO es un procedimiento para despejar una Arma de Fuego?",
+            ops: ["Meter el dedo en el gatillo", "Quitar el cargador", "Revisar visualmente la recámara", "Apuntar a un lugar seguro"],
+            ans: "Meter el dedo en el gatillo",
+            cat: "Armamento",
+            exp: "Jamás se debe introducir el dedo en el gatillo durante el despeje; esto provocaría un disparo accidental."
+        },
+        // --- PROTECCIÓN VIP ---
+        {
+            t: "¿La misión del custodio es?",
+            ops: ["Proteger cargas de alto valor monetario", "Proteger solo al conductor", "Evitar el tráfico", "Llenar bitácoras"],
+            ans: "Proteger cargas de alto valor monetario",
+            cat: "Custodia de Valores",
+            exp: "El objetivo principal es asegurar que los bienes valiosos lleguen a su destino sin pérdidas."
+        },
+        {
+            t: "¿Disciplina de Convoy son?",
+            ops: ["Regulaciones para garantizar un desplazamiento seguro", "Reglas para conducir rápido", "Normas de etiqueta", "Leyes de tránsito comunes"],
+            ans: "Regulaciones para garantizar un desplazamiento seguro",
+            cat: "Custodia en Ruta",
+            exp: "Incluye distancias, velocidades, formaciones y comunicaciones estrictas entre los vehículos del grupo."
+        },
+        {
+            t: "¿Durante la operación de custodia, el Custodio debe mantener control visual en?",
+            ops: ["360 grados", "180 grados", "Solo al frente", "Solo a los espejos"],
+            ans: "360 grados",
+            cat: "Vigilancia",
+            exp: "La seguridad es esférica. El custodio debe estar atento a amenazas desde cualquier dirección."
+        },
+        // --- LEGISLACIÓN ---
+        {
+            t: "¿Infracción penal sancionada con pena privativa de libertad mayor a 30 días se llama?",
+            ops: ["Delito", "Contravención", "Falta", "Indisciplina"],
+            ans: "Delito",
+            cat: "Marco Legal",
+            exp: "Según el COIP, las infracciones graves (>30 días de cárcel) son Delitos; las menores son Contravenciones."
+        },
+        {
+            t: "¿Cuándo una persona puede actuar en legítima defensa?",
+            ops: [
+                "Cuando exista agresión ilegítima, necesidad racional del medio empleado y falta de provocación suficiente",
+                "Cuando exista solo peligro potencial sin agresión actual",
+                "Cuando la víctima haya provocado la agresión de forma suficiente",
+                "Cuando se use cualquier medio, sin importar proporcionalidad"
+            ],
+            ans: "Cuando exista agresión ilegítima, necesidad racional del medio empleado y falta de provocación suficiente",
+            cat: "Marco Legal",
+            exp: "La legítima defensa requiere agresión ilegítima, medio racionalmente necesario y ausencia de provocación suficiente."
+        },
+    ];
+
+    const state = {
+        questions: [],
+        currentIndex: 0,
+        score: 0,
+        answered: false,
+    };
+
+    const screens = {
+        start: document.getElementById("screen-start"),
+        quiz: document.getElementById("screen-quiz"),
+        result: document.getElementById("screen-result"),
+    };
+    const statsBar = document.getElementById("stats-bar");
+    const progressText = document.getElementById("progress-text");
+    const scoreText = document.getElementById("score-text");
+    const categoryEl = document.getElementById("q-category");
+    const questionEl = document.getElementById("q-text");
+    const optionsContainer = document.getElementById("options-container");
+    const feedback = document.getElementById("feedback");
+    const feedbackMsg = document.getElementById("feedback-msg");
+    const nextBtn = document.getElementById("next-btn");
+    const resultTitle = document.getElementById("result-title");
+    const finalScore = document.getElementById("final-score");
+    const resultMsg = document.getElementById("result-msg");
+
+    function shuffleArray(items) {
+        const copy = items.slice();
+        for (let i = copy.length - 1; i > 0; i -= 1) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [copy[i], copy[j]] = [copy[j], copy[i]];
+        }
+        return copy;
+    }
+
+    function showScreen(screenKey) {
+        Object.values(screens).forEach((screen) => screen.classList.remove("active"));
+        screens[screenKey].classList.add("active");
+    }
+
+    function startQuiz() {
+        if (!questionBank.length) {
+            alert("No hay preguntas cargadas.");
+            return;
+        }
+        state.questions = shuffleArray(questionBank).map((question) => ({
+            ...question,
+            ops: shuffleArray(question.ops),
+        }));
+        state.currentIndex = 0;
+        state.score = 0;
+        state.answered = false;
+        statsBar.style.display = "flex";
+        showScreen("quiz");
+        renderQuestion();
+    }
+
+    function renderQuestion() {
+        const question = state.questions[state.currentIndex];
+        categoryEl.textContent = question.cat;
+        questionEl.textContent = question.t;
+        progressText.textContent = `Pregunta ${state.currentIndex + 1}/${state.questions.length}`;
+        scoreText.textContent = `Puntaje: ${state.score}`;
+        feedback.style.display = "none";
+        feedback.classList.remove("error-mode");
+        optionsContainer.innerHTML = "";
+        state.answered = false;
+
+        question.ops.forEach((option) => {
+            const btn = document.createElement("button");
+            btn.className = "option-btn";
+            btn.type = "button";
+            btn.textContent = option;
+            btn.addEventListener("click", () => handleAnswer(btn, question));
+            optionsContainer.appendChild(btn);
+        });
+
+        const isLast = state.currentIndex === state.questions.length - 1;
+        nextBtn.textContent = isLast ? "Finalizar ➤" : "Siguiente ➤";
+    }
+
+    function handleAnswer(selectedBtn, question) {
+        if (state.answered) {
+            return;
+        }
+        state.answered = true;
+        const buttons = Array.from(optionsContainer.querySelectorAll(".option-btn"));
+        buttons.forEach((btn) => btn.classList.add("disabled"));
+
+        const isCorrect = selectedBtn.textContent === question.ans;
+        if (isCorrect) {
+            selectedBtn.classList.add("correct");
+            state.score += 1;
+        } else {
+            selectedBtn.classList.add("wrong");
+            const correctBtn = buttons.find((btn) => btn.textContent === question.ans);
+            if (correctBtn) {
+                correctBtn.classList.add("correct");
+            }
+        }
+
+        scoreText.textContent = `Puntaje: ${state.score}`;
+        feedbackMsg.textContent = `${isCorrect ? "Correcto." : "Incorrecto."} ${question.exp}`;
+        feedback.classList.toggle("error-mode", !isCorrect);
+        feedback.style.display = "block";
+    }
+
+    function nextQuestion() {
+        if (!state.answered) {
+            return;
+        }
+        const isLast = state.currentIndex === state.questions.length - 1;
+        if (isLast) {
+            showResults();
+            return;
+        }
+        state.currentIndex += 1;
+        renderQuestion();
+    }
+
+    function showResults() {
+        const total = state.questions.length;
+        const minScore = Math.ceil(total * 0.8);
+        finalScore.textContent = `${state.score}/${total}`;
+        const passed = state.score >= minScore;
+        resultTitle.textContent = passed ? "Aprobado" : "Necesitas reforzar";
+        resultMsg.textContent = passed
+            ? "Buen trabajo. Mantén la disciplina y repasa los puntos críticos."
+            : `No alcanzaste la nota mínima (${minScore}/${total}). Repasa el material y vuelve a intentarlo.`;
+        finalScore.classList.toggle("fail", !passed);
+        statsBar.style.display = "none";
+        showScreen("result");
+    }
+</script>
+</body>
+</html>
