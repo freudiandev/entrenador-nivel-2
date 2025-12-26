@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Entrenador Táctico de Seguridad Nivel II</title>
+    <style>
+        :root {
+            --bg-color: #f0f2f5;
+            --card-bg: #ffffff;
+            --primary: #003366; /* Azul policial */
+            --secondary: #d4af37; /* Dorado seguridad */
+            --text: #1c1e21;
+            --success: #2e7d32;
+            --error: #c62828;
+            --font-main: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            font-family: var(--font-main);
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 850px;
+            background: var(--card-bg);
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Header */
+        header {
+            background: var(--primary);
+            color: white;
+            padding: 20px;
+            text-align: center;
+            border-bottom: 4px solid var(--secondary);
+        }
+        
+        h1 { margin: 0; font-size: 1.5rem; text-transform: uppercase; letter-spacing: 1px; }
+        .stats-bar {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 20px;
+            background: #e3e6e8;
+            font-weight: bold;
+            font-size: 0.9rem;
+            color: var(--primary);
+        }
+
+        /* Pantallas */
+        .screen { display: none; padding: 20px; animation: fadeIn 0.4s ease-in; }
+        .screen.active { display: block; }
+        
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Pregunta */
+        .question-card {
+            margin-bottom: 20px;
+        }
+        .category-tag {
+            background: var(--secondary);
+            color: var(--primary);
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            font-weight: bold;
+            display: inline-block;
+            margin-bottom: 10px;
+        }
+        .question-text {
+            font-size: 1.2rem;
+            line-height: 1.5;
+            color: var(--text);
+            font-weight: 600;
+        }
+
+        /* Opciones */
+        .options-grid {
+            display: grid;
+            gap: 12px;
+        }
+        .option-btn {
+            background: white;
+            border: 2px solid #ddd;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: left;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 1rem;
+            position: relative;
+        }
+        .option-btn:hover:not(.disabled) {
+            border-color: var(--primary);
+            background: #f8fbff;
+        }
+        .option-btn.disabled { cursor: default; }
+        
+        /* Estados de respuesta */
+        .option-btn.correct { background: #e8f5e9; border-color: var(--success); color: var(--success); }
+        .option-btn.wrong { background: #ffebee; border-color: var(--error); color: var(--error); }
+        
+        .feedback-area {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 8px;
+            background: #e3f2fd;
+            border-left: 5px solid var(--primary);
+            display: none;
+        }
+        #feedback-msg { white-space: pre-line; }
+        .feedback-area.error-mode {
+            background: #ffebee;
+            border-left-color: var(--error);
+        }
+
+        /* Botones de control */
+        .controls {
+            margin-top: 20px;
+            text-align: right;
+        }
+        .btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            font-size: 1rem;
+            cursor: pointer;
+            text-transform: uppercase;
+            font-weight: bold;
+            transition: background 0.3s;
+        }
+        .btn:hover { background: #004c99; }
+        .btn-restart { background: var(--error); }
+        .btn-restart:hover { background: #b71c1c; }
+
+        /* Resultados */
+        .result-box { text-align: center; padding: 40px 20px; }
+        .score-display { font-size: 4rem; font-weight: bold; color: var(--primary); margin: 20px 0; }
+        .score-display.fail { color: var(--error); }
+        
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>🛡️ Simulador Nivel II: Seguridad Privada</h1>
+    </header>
+    
+    <div class="stats-bar" id="stats-bar" style="display:none;">
+        <span id="progress-text">Pregunta 1/X</span>
+        <span id="score-text">Puntaje: 0</span>
+    </div>
+
+    <div id="screen-start" class="screen active">
+        <div style="text-align: center; padding: 40px;">
+            <h2>Entrenamiento Táctico Intensivo</h2>
+            <p>Este simulador contiene preguntas del Banco Oficial. El sistema <strong>aleatoriza</strong> tanto el orden de las preguntas como las opciones de respuesta para garantizar un aprendizaje real y no por memoria visual.</p>
+            <br>
+            <div style="background: #e8f5e9; padding: 15px; border-radius: 8px; display: inline-block; text-align: left;">
+                <strong>Reglas del Juego:</strong>
+                <ul style="margin: 10px 0 0 20px;">
+                    <li>Debes completar todas las preguntas.</li>
+                    <li>Las opciones cambiarán de lugar cada vez.</li>
+                    <li>Nota mínima para aprobar: <strong>80%</strong>.</li>
+                    <li>Si fallas, se mostrará la justificación teórica.</li>
+                </ul>
+            </div>
+            <br><br>
+            <button class="btn" onclick="startQuiz()">Iniciar Entrenamiento</button>
+        </div>
+    </div>
+
+    <div id="screen-quiz" class="screen">
+        <div class="question-card">
+            <span class="category-tag" id="q-category">CATEGORÍA</span>
+            <div class="question-text" id="q-text">
+                </div>
+        </div>
+
+        <div class="options-grid" id="options-container">
+            </div>
+
+        <div class="feedback-area" id="feedback">
+            <h4 style="margin: 0 0 10px 0;">Análisis de Respuesta:</h4>
+            <p id="feedback-msg"></p>
+            <div class="controls">
+                <button class="btn" id="next-btn" onclick="nextQuestion()">Siguiente ➤</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="screen-result" class="screen">
+        <div class="result-box">
+            <h2 id="result-title">Resultado Final</h2>
+            <div class="score-display" id="final-score">0/20</div>
+            <p id="result-msg" style="font-size: 1.2rem;">Mensaje</p>
+            <br>
+            <button class="btn btn-restart" onclick="location.reload()">Reiniciar Entrenamiento</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    const questionBankRawEl = document.getElementById("question-bank-raw");
+    const theoryRawEl = document.getElementById("theory-raw");
+    const rawQuestionBank = questionBankRawEl ? questionBankRawEl.textContent : "";
+    const rawTheoryText = theoryRawEl ? theoryRawEl.textContent : "";
+
+    const THEORY_FALLBACK = "Consulta el material del Nivel II para este tema.";
+    const STOP_WORDS = new Set([
+        "de", "la", "el", "los", "las", "un", "una", "unos", "unas", "y", "o", "u",
+        "que", "como", "cuando", "donde", "para", "por", "con", "sin", "sobre",
+        "al", "del", "se", "es", "son", "ser", "su", "sus", "en", "a", "ya", "si",
+        "qué", "cuál", "cuáles", "quien", "quienes", "este", "esta", "estos", "estas",
+    ]);
+
+    const questionBank = buildQuestionBank(rawQuestionBank, rawTheoryText);
+    const distractorPool = buildDistractorPool(questionBank);
+
+    const state = {
+        questions: [],
+        currentIndex: 0,
+        score: 0,
+        answered: false,
+    };
+
+    const screens = {
+        start: document.getElementById("screen-start"),
+        quiz: document.getElementById("screen-quiz"),
+        result: document.getElementById("screen-result"),
+    };
+    const statsBar = document.getElementById("stats-bar");
+    const progressText = document.getElementById("progress-text");
+    const scoreText = document.getElementById("score-text");
+    const categoryEl = document.getElementById("q-category");
+    const questionEl = document.getElementById("q-text");
+    const optionsContainer = document.getElementById("options-container");
+    const feedback = document.getElementById("feedback");
+    const feedbackMsg = document.getElementById("feedback-msg");
+    const nextBtn = document.getElementById("next-btn");
+    const resultTitle = document.getElementById("result-title");
+    const finalScore = document.getElementById("final-score");
+    const resultMsg = document.getElementById("result-msg");
+
+    function normalizeText(text) {
+        return text
+            .toLowerCase()
+            .replace(/[¿?.,;:()]/g, " ")
+            .replace(/\s+/g, " ")
+            .trim();
+    }
+
+    function extractKeywords(text) {
+        return normalizeText(text)
+            .split(" ")
+            .filter((word) => word.length >= 5 && !STOP_WORDS.has(word))
+            .slice(0, 8);
+    }
+
+    function extractSnippet(text, idx) {
+        let start = text.lastIndexOf("\n", idx);
+        let end = text.indexOf("\n", idx);
+        if (start === -1) {
+            start = 0;
+        } else {
+            start += 1;
+        }
+        if (end === -1) {
+            end = text.length;
+        }
+        let snippet = text.slice(start, end).trim();
+        if (snippet.length < 40) {
+            const nextEnd = text.indexOf("\n", end + 1);
+            if (nextEnd !== -1) {
+                snippet = text.slice(start, nextEnd).trim();
+            }
+        }
+        if (snippet.length > 700) {
+            snippet = `${snippet.slice(0, 700).trim()}...`;
+        }
+        return snippet;
+    }
+
+    function findTheorySnippet(question, theoryText, theoryLower) {
+        const candidates = [];
+        if (question.ans && !question.ans.startsWith("Respuesta")) {
+            candidates.push(question.ans);
+        }
+        candidates.push(question.t);
+        candidates.push(...extractKeywords(question.t));
+        candidates.push(...extractKeywords(question.ans));
+
+        for (const candidate of candidates) {
+            const needle = normalizeText(candidate);
+            if (needle.length < 5) {
+                continue;
+            }
+            const idx = theoryLower.indexOf(needle);
+            if (idx !== -1) {
+                return extractSnippet(theoryText, idx);
+            }
+        }
+
+        return THEORY_FALLBACK;
+    }
+
+    function parseQuestionBlock(block, answerLetter) {
+        const condensed = block.replace(/\s+/g, " ").trim();
+        const optionRegex = /([A-D])\)\s*/g;
+        const matches = Array.from(condensed.matchAll(optionRegex));
+        if (!matches.length) {
+            return null;
+        }
+
+        const questionText = condensed.slice(0, matches[0].index).trim();
+        const options = [];
+
+        for (let i = 0; i < matches.length; i += 1) {
+            const start = matches[i].index + matches[i][0].length;
+            const end = i + 1 < matches.length ? matches[i + 1].index : condensed.length;
+            const text = condensed.slice(start, end).trim();
+            options.push({
+                id: matches[i][1],
+                text,
+                isCorrect: matches[i][1] === answerLetter,
+            });
+        }
+
+        const correctOption = options.find((option) => option.isCorrect);
+        return {
+            t: questionText,
+            ops: options,
+            ans: correctOption ? correctOption.text : `Respuesta ${answerLetter}`,
+            cat: "Banco Nivel II",
+            exp: "",
+        };
+    }
+
+    function buildQuestionBank(rawText, theoryText) {
+        const questions = [];
+        const answerRegex = /ANSWER:\s*([A-D])/g;
+        let startIndex = rawText.indexOf("¿");
+        if (startIndex === -1) {
+            return questions;
+        }
+
+        const theoryLower = theoryText.toLowerCase();
+        answerRegex.lastIndex = startIndex;
+
+        while (true) {
+            const match = answerRegex.exec(rawText);
+            if (!match || startIndex === -1) {
+                break;
+            }
+            const block = rawText.slice(startIndex, match.index).trim();
+            const parsed = parseQuestionBlock(block, match[1]);
+            if (parsed) {
+                parsed.exp = findTheorySnippet(parsed, theoryText, theoryLower);
+                questions.push(parsed);
+            }
+            startIndex = rawText.indexOf("¿", answerRegex.lastIndex);
+            if (startIndex === -1) {
+                break;
+            }
+            answerRegex.lastIndex = startIndex;
+        }
+
+        return questions;
+    }
+
+    function buildDistractorPool(questions) {
+        const pool = [];
+        const seen = new Set();
+        questions.forEach((question) => {
+            question.ops.forEach((option) => {
+                const key = normalizeText(option.text);
+                if (!key || seen.has(key)) {
+                    return;
+                }
+                seen.add(key);
+                pool.push(option.text);
+            });
+        });
+        return pool;
+    }
+
+    function fillDistractors(options, question, pool) {
+        const normalized = new Set(options.map((option) => normalizeText(option.text)));
+        const correctKey = normalizeText(question.ans);
+        const candidates = pool.filter((text) => {
+            const key = normalizeText(text);
+            return key && key !== correctKey && !normalized.has(key);
+        });
+        while (options.length < 4 && candidates.length) {
+            const idx = getRandomInt(candidates.length);
+            const text = candidates.splice(idx, 1)[0];
+            normalized.add(normalizeText(text));
+            options.push({
+                id: `X${options.length}`,
+                text,
+                isCorrect: false,
+            });
+        }
+        while (options.length < 4) {
+            options.push({
+                id: `F${options.length}`,
+                text: `Opción ${options.length + 1}`,
+                isCorrect: false,
+            });
+        }
+    }
+
+    function getRandomInt(max) {
+        if (max <= 1) {
+            return 0;
+        }
+        if (window.crypto && window.crypto.getRandomValues) {
+            const buffer = new Uint32Array(1);
+            const limit = Math.floor(0x100000000 / max) * max;
+            let value = 0;
+            do {
+                window.crypto.getRandomValues(buffer);
+                value = buffer[0];
+            } while (value >= limit);
+            return value % max;
+        }
+        return Math.floor(Math.random() * max);
+    }
+
+    function shuffleArray(items) {
+        const copy = items.slice();
+        for (let i = copy.length - 1; i > 0; i -= 1) {
+            const j = getRandomInt(i + 1);
+            [copy[i], copy[j]] = [copy[j], copy[i]];
+        }
+        return copy;
+    }
+
+    function showScreen(screenKey) {
+        Object.values(screens).forEach((screen) => screen.classList.remove("active"));
+        screens[screenKey].classList.add("active");
+    }
+
+    function startQuiz() {
+        if (!questionBank.length) {
+            alert("No hay preguntas cargadas.");
+            return;
+        }
+        state.questions = shuffleArray(questionBank).map((question) => {
+            const options = question.ops.map((option) => ({ ...option }));
+            fillDistractors(options, question, distractorPool);
+            return {
+                ...question,
+                ops: shuffleArray(options),
+            };
+        });
+        state.currentIndex = 0;
+        state.score = 0;
+        state.answered = false;
+        statsBar.style.display = "flex";
+        showScreen("quiz");
+        renderQuestion();
+    }
+
+    function renderQuestion() {
+        const question = state.questions[state.currentIndex];
+        categoryEl.textContent = question.cat;
+        questionEl.textContent = question.t;
+        progressText.textContent = `Pregunta ${state.currentIndex + 1}/${state.questions.length}`;
+        scoreText.textContent = `Puntaje: ${state.score}`;
+        feedback.style.display = "none";
+        feedback.classList.remove("error-mode");
+        optionsContainer.innerHTML = "";
+        state.answered = false;
+
+        question.ops.forEach((option) => {
+            const btn = document.createElement("button");
+            btn.className = "option-btn";
+            btn.type = "button";
+            btn.textContent = option.text;
+            btn.dataset.correct = option.isCorrect ? "true" : "false";
+            btn.addEventListener("click", () => handleAnswer(btn, question));
+            optionsContainer.appendChild(btn);
+        });
+
+        const isLast = state.currentIndex === state.questions.length - 1;
+        nextBtn.textContent = isLast ? "Finalizar ➤" : "Siguiente ➤";
+    }
+
+    function handleAnswer(selectedBtn, question) {
+        if (state.answered) {
+            return;
+        }
+        state.answered = true;
+        const buttons = Array.from(optionsContainer.querySelectorAll(".option-btn"));
+        buttons.forEach((btn) => btn.classList.add("disabled"));
+
+        const isCorrect = selectedBtn.dataset.correct === "true";
+        if (isCorrect) {
+            selectedBtn.classList.add("correct");
+            state.score += 1;
+        } else {
+            selectedBtn.classList.add("wrong");
+            const correctBtn = buttons.find((btn) => btn.dataset.correct === "true");
+            if (correctBtn) {
+                correctBtn.classList.add("correct");
+            }
+        }
+
+        scoreText.textContent = `Puntaje: ${state.score}`;
+        if (isCorrect) {
+            feedbackMsg.textContent = "Correcto.";
+        } else {
+            const correctText = question.ans || "Revisa la respuesta correcta.";
+            const theoryText = question.exp || THEORY_FALLBACK;
+            feedbackMsg.textContent = `Incorrecto.\nLa respuesta correcta es: ${correctText}.\n\nFundamento:\n${theoryText}`;
+        }
+        feedback.classList.toggle("error-mode", !isCorrect);
+        feedback.style.display = "block";
+    }
+
+    function nextQuestion() {
+        if (!state.answered) {
+            return;
+        }
+        const isLast = state.currentIndex === state.questions.length - 1;
+        if (isLast) {
+            showResults();
+            return;
+        }
+        state.currentIndex += 1;
+        renderQuestion();
+    }
+
+    function showResults() {
+        const total = state.questions.length;
+        const minScore = Math.ceil(total * 0.8);
+        finalScore.textContent = `${state.score}/${total}`;
+        const passed = state.score >= minScore;
+        resultTitle.textContent = passed ? "Aprobado" : "Necesitas reforzar";
+        resultMsg.textContent = passed
+            ? "Buen trabajo. Mantén la disciplina y repasa los puntos críticos."
+            : `No alcanzaste la nota mínima (${minScore}/${total}). Repasa el material y vuelve a intentarlo.`;
+        finalScore.classList.toggle("fail", !passed);
+        statsBar.style.display = "none";
+        showScreen("result");
+    }
+</script>
+</body>
+</html>
