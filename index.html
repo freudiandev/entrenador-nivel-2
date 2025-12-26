@@ -120,6 +120,7 @@
             border-left: 5px solid var(--primary);
             display: none;
         }
+        #feedback-msg { white-space: pre-line; }
         .feedback-area.error-mode {
             background: #ffebee;
             border-left-color: var(--error);
@@ -215,99 +216,19 @@
 </div>
 
 <script>
-    /* =================================================================
-       BASE DE DATOS DE PREGUNTAS (EXTRACTO ROBUSTO DEL BANCO OFICIAL)
-       Nota: Se han seleccionado preguntas representativas de todos los módulos
-       para asegurar la funcionalidad sin exceder límites de código.
-       ================================================================= */
-    const questionBank = [
-        // --- CRISIS Y EMERGENCIAS ---
-        {
-            t: "¿Acción Adaptativa es?",
-            ops: ["Es la que se toma cuando nada se puede hacer y consiste en aprender a vivir con la crisis", "Una acción preventiva", "Una acción correctiva inmediata", "Una acción de eliminación de riesgo"],
-            ans: "Es la que se toma cuando nada se puede hacer y consiste en aprender a vivir con la crisis",
-            cat: "Manejo de Crisis",
-            exp: "La Acción Adaptativa (ej. ante desastres naturales) implica ajustarse a una realidad inevitable cuando no se puede prevenir ni corregir."
-        },
-        {
-            t: "¿Acción Contingente se denomina así porque se trata de una acción?",
-            ops: ["Temporal o pasajera", "Permanente", "Definitiva", "Estratégica a largo plazo"],
-            ans: "Temporal o pasajera",
-            cat: "Manejo de Crisis",
-            exp: "Es una medida 'parche' o de reserva (como un generador eléctrico) que no soluciona la causa raíz."
-        },
-        {
-            t: "¿Crisis es una situación?",
-            ops: ["Compleja y decisiva, producida por sorpresa", "Rutinaria y esperada", "Administrativa simple", "De bajo impacto"],
-            ans: "Compleja y decisiva, producida por sorpresa",
-            cat: "Manejo de Crisis",
-            exp: "La crisis se caracteriza por la sorpresa, la amenaza a los objetivos y la necesidad de respuesta rápida."
-        },
-        // --- ARMAS Y TIRO ---
-        {
-            t: "¿Antes de utilizar un arma de fuego y como rutina, debe asegurarse de que la misma esté?",
-            ops: ["Con el cañón limpio por completo", "Cargada al máximo", "Con el seguro fuera", "Engrasada en exceso"],
-            ans: "Con el cañón limpio por completo",
-            cat: "Armamento",
-            exp: "Un cañón obstruido puede causar una explosión del arma al disparar. Es una norma de seguridad vital."
-        },
-        {
-            t: "¿Arma de fuego automática diseñada para ser empleada por ambas manos, que posee selector de fuego?",
-            ops: ["Subametralladora", "Pistola", "Revólver", "Escopeta"],
-            ans: "Subametralladora",
-            cat: "Armamento",
-            exp: "La subametralladora es un arma automática de mayor capacidad de fuego que una pistola, diseñada para uso a dos manos."
-        },
-        {
-            t: "¿Cuál NO es un procedimiento para despejar una Arma de Fuego?",
-            ops: ["Meter el dedo en el gatillo", "Quitar el cargador", "Revisar visualmente la recámara", "Apuntar a un lugar seguro"],
-            ans: "Meter el dedo en el gatillo",
-            cat: "Armamento",
-            exp: "Jamás se debe introducir el dedo en el gatillo durante el despeje; esto provocaría un disparo accidental."
-        },
-        // --- PROTECCIÓN VIP ---
-        {
-            t: "¿La misión del custodio es?",
-            ops: ["Proteger cargas de alto valor monetario", "Proteger solo al conductor", "Evitar el tráfico", "Llenar bitácoras"],
-            ans: "Proteger cargas de alto valor monetario",
-            cat: "Custodia de Valores",
-            exp: "El objetivo principal es asegurar que los bienes valiosos lleguen a su destino sin pérdidas."
-        },
-        {
-            t: "¿Disciplina de Convoy son?",
-            ops: ["Regulaciones para garantizar un desplazamiento seguro", "Reglas para conducir rápido", "Normas de etiqueta", "Leyes de tránsito comunes"],
-            ans: "Regulaciones para garantizar un desplazamiento seguro",
-            cat: "Custodia en Ruta",
-            exp: "Incluye distancias, velocidades, formaciones y comunicaciones estrictas entre los vehículos del grupo."
-        },
-        {
-            t: "¿Durante la operación de custodia, el Custodio debe mantener control visual en?",
-            ops: ["360 grados", "180 grados", "Solo al frente", "Solo a los espejos"],
-            ans: "360 grados",
-            cat: "Vigilancia",
-            exp: "La seguridad es esférica. El custodio debe estar atento a amenazas desde cualquier dirección."
-        },
-        // --- LEGISLACIÓN ---
-        {
-            t: "¿Infracción penal sancionada con pena privativa de libertad mayor a 30 días se llama?",
-            ops: ["Delito", "Contravención", "Falta", "Indisciplina"],
-            ans: "Delito",
-            cat: "Marco Legal",
-            exp: "Según el COIP, las infracciones graves (>30 días de cárcel) son Delitos; las menores son Contravenciones."
-        },
-        {
-            t: "¿Cuándo una persona puede actuar en legítima defensa?",
-            ops: [
-                "Cuando exista agresión ilegítima, necesidad racional del medio empleado y falta de provocación suficiente",
-                "Cuando exista solo peligro potencial sin agresión actual",
-                "Cuando la víctima haya provocado la agresión de forma suficiente",
-                "Cuando se use cualquier medio, sin importar proporcionalidad"
-            ],
-            ans: "Cuando exista agresión ilegítima, necesidad racional del medio empleado y falta de provocación suficiente",
-            cat: "Marco Legal",
-            exp: "La legítima defensa requiere agresión ilegítima, medio racionalmente necesario y ausencia de provocación suficiente."
-        },
-    ];
+    const rawQuestionBank = document.getElementById("question-bank-raw").textContent;
+    const rawTheoryText = document.getElementById("theory-raw").textContent;
+
+    const THEORY_FALLBACK = "Consulta el material del Nivel II para este tema.";
+    const STOP_WORDS = new Set([
+        "de", "la", "el", "los", "las", "un", "una", "unos", "unas", "y", "o", "u",
+        "que", "como", "cuando", "donde", "para", "por", "con", "sin", "sobre",
+        "al", "del", "se", "es", "son", "ser", "su", "sus", "en", "a", "ya", "si",
+        "qué", "cuál", "cuáles", "quien", "quienes", "este", "esta", "estos", "estas",
+    ]);
+
+    const questionBank = buildQuestionBank(rawQuestionBank, rawTheoryText);
+    const distractorPool = buildDistractorPool(questionBank);
 
     const state = {
         questions: [],
@@ -334,10 +255,195 @@
     const finalScore = document.getElementById("final-score");
     const resultMsg = document.getElementById("result-msg");
 
+    function normalizeText(text) {
+        return text
+            .toLowerCase()
+            .replace(/[¿?.,;:()]/g, " ")
+            .replace(/\s+/g, " ")
+            .trim();
+    }
+
+    function extractKeywords(text) {
+        return normalizeText(text)
+            .split(" ")
+            .filter((word) => word.length >= 5 && !STOP_WORDS.has(word))
+            .slice(0, 8);
+    }
+
+    function extractSnippet(text, idx) {
+        let start = text.lastIndexOf("\n", idx);
+        let end = text.indexOf("\n", idx);
+        if (start === -1) {
+            start = 0;
+        } else {
+            start += 1;
+        }
+        if (end === -1) {
+            end = text.length;
+        }
+        let snippet = text.slice(start, end).trim();
+        if (snippet.length < 40) {
+            const nextEnd = text.indexOf("\n", end + 1);
+            if (nextEnd !== -1) {
+                snippet = text.slice(start, nextEnd).trim();
+            }
+        }
+        if (snippet.length > 400) {
+            snippet = `${snippet.slice(0, 400).trim()}...`;
+        }
+        return snippet;
+    }
+
+    function findTheorySnippet(question, theoryText, theoryLower) {
+        const candidates = [];
+        if (question.ans && !question.ans.startsWith("Respuesta")) {
+            candidates.push(question.ans);
+        }
+        candidates.push(question.t);
+        candidates.push(...extractKeywords(question.t));
+        candidates.push(...extractKeywords(question.ans));
+
+        for (const candidate of candidates) {
+            const needle = normalizeText(candidate);
+            if (needle.length < 5) {
+                continue;
+            }
+            const idx = theoryLower.indexOf(needle);
+            if (idx !== -1) {
+                return extractSnippet(theoryText, idx);
+            }
+        }
+
+        return THEORY_FALLBACK;
+    }
+
+    function parseQuestionBlock(block, answerLetter) {
+        const condensed = block.replace(/\s+/g, " ").trim();
+        const optionRegex = /([A-D])\)\s*/g;
+        const matches = Array.from(condensed.matchAll(optionRegex));
+        if (!matches.length) {
+            return null;
+        }
+
+        const questionText = condensed.slice(0, matches[0].index).trim();
+        const options = [];
+
+        for (let i = 0; i < matches.length; i += 1) {
+            const start = matches[i].index + matches[i][0].length;
+            const end = i + 1 < matches.length ? matches[i + 1].index : condensed.length;
+            const text = condensed.slice(start, end).trim();
+            options.push({
+                id: matches[i][1],
+                text,
+                isCorrect: matches[i][1] === answerLetter,
+            });
+        }
+
+        const correctOption = options.find((option) => option.isCorrect);
+        return {
+            t: questionText,
+            ops: options,
+            ans: correctOption ? correctOption.text : `Respuesta ${answerLetter}`,
+            cat: "Banco Nivel II",
+            exp: "",
+        };
+    }
+
+    function buildQuestionBank(rawText, theoryText) {
+        const questions = [];
+        const answerRegex = /ANSWER:\s*([A-D])/g;
+        let startIndex = rawText.indexOf("¿");
+        if (startIndex === -1) {
+            return questions;
+        }
+
+        const theoryLower = theoryText.toLowerCase();
+        answerRegex.lastIndex = startIndex;
+
+        while (true) {
+            const match = answerRegex.exec(rawText);
+            if (!match || startIndex === -1) {
+                break;
+            }
+            const block = rawText.slice(startIndex, match.index).trim();
+            const parsed = parseQuestionBlock(block, match[1]);
+            if (parsed) {
+                parsed.exp = findTheorySnippet(parsed, theoryText, theoryLower);
+                questions.push(parsed);
+            }
+            startIndex = rawText.indexOf("¿", answerRegex.lastIndex);
+            if (startIndex === -1) {
+                break;
+            }
+            answerRegex.lastIndex = startIndex;
+        }
+
+        return questions;
+    }
+
+    function buildDistractorPool(questions) {
+        const pool = [];
+        const seen = new Set();
+        questions.forEach((question) => {
+            question.ops.forEach((option) => {
+                const key = normalizeText(option.text);
+                if (!key || seen.has(key)) {
+                    return;
+                }
+                seen.add(key);
+                pool.push(option.text);
+            });
+        });
+        return pool;
+    }
+
+    function fillDistractors(options, question, pool) {
+        const normalized = new Set(options.map((option) => normalizeText(option.text)));
+        const correctKey = normalizeText(question.ans);
+        const candidates = pool.filter((text) => {
+            const key = normalizeText(text);
+            return key && key !== correctKey && !normalized.has(key);
+        });
+        while (options.length < 4 && candidates.length) {
+            const idx = getRandomInt(candidates.length);
+            const text = candidates.splice(idx, 1)[0];
+            normalized.add(normalizeText(text));
+            options.push({
+                id: `X${options.length}`,
+                text,
+                isCorrect: false,
+            });
+        }
+        while (options.length < 4) {
+            options.push({
+                id: `F${options.length}`,
+                text: `Opción ${options.length + 1}`,
+                isCorrect: false,
+            });
+        }
+    }
+
+    function getRandomInt(max) {
+        if (max <= 1) {
+            return 0;
+        }
+        if (window.crypto && window.crypto.getRandomValues) {
+            const buffer = new Uint32Array(1);
+            const limit = Math.floor(0x100000000 / max) * max;
+            let value = 0;
+            do {
+                window.crypto.getRandomValues(buffer);
+                value = buffer[0];
+            } while (value >= limit);
+            return value % max;
+        }
+        return Math.floor(Math.random() * max);
+    }
+
     function shuffleArray(items) {
         const copy = items.slice();
         for (let i = copy.length - 1; i > 0; i -= 1) {
-            const j = Math.floor(Math.random() * (i + 1));
+            const j = getRandomInt(i + 1);
             [copy[i], copy[j]] = [copy[j], copy[i]];
         }
         return copy;
@@ -353,10 +459,14 @@
             alert("No hay preguntas cargadas.");
             return;
         }
-        state.questions = shuffleArray(questionBank).map((question) => ({
-            ...question,
-            ops: shuffleArray(question.ops),
-        }));
+        state.questions = shuffleArray(questionBank).map((question) => {
+            const options = question.ops.map((option) => ({ ...option }));
+            fillDistractors(options, question, distractorPool);
+            return {
+                ...question,
+                ops: shuffleArray(options),
+            };
+        });
         state.currentIndex = 0;
         state.score = 0;
         state.answered = false;
@@ -380,7 +490,8 @@
             const btn = document.createElement("button");
             btn.className = "option-btn";
             btn.type = "button";
-            btn.textContent = option;
+            btn.textContent = option.text;
+            btn.dataset.correct = option.isCorrect ? "true" : "false";
             btn.addEventListener("click", () => handleAnswer(btn, question));
             optionsContainer.appendChild(btn);
         });
@@ -397,20 +508,26 @@
         const buttons = Array.from(optionsContainer.querySelectorAll(".option-btn"));
         buttons.forEach((btn) => btn.classList.add("disabled"));
 
-        const isCorrect = selectedBtn.textContent === question.ans;
+        const isCorrect = selectedBtn.dataset.correct === "true";
         if (isCorrect) {
             selectedBtn.classList.add("correct");
             state.score += 1;
         } else {
             selectedBtn.classList.add("wrong");
-            const correctBtn = buttons.find((btn) => btn.textContent === question.ans);
+            const correctBtn = buttons.find((btn) => btn.dataset.correct === "true");
             if (correctBtn) {
                 correctBtn.classList.add("correct");
             }
         }
 
         scoreText.textContent = `Puntaje: ${state.score}`;
-        feedbackMsg.textContent = `${isCorrect ? "Correcto." : "Incorrecto."} ${question.exp}`;
+        if (isCorrect) {
+            feedbackMsg.textContent = "Correcto.";
+        } else {
+            const correctText = question.ans || "Revisa la respuesta correcta.";
+            const theoryText = question.exp || THEORY_FALLBACK;
+            feedbackMsg.textContent = `Incorrecto.\nRespuesta correcta: ${correctText}\nTeoría: ${theoryText}`;
+        }
         feedback.classList.toggle("error-mode", !isCorrect);
         feedback.style.display = "block";
     }
