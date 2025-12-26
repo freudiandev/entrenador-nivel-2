@@ -432,7 +432,7 @@
 
     function parseQuestionBlock(block, answerLetter) {
         const condensed = block.replace(/\s+/g, " ").trim();
-        const optionRegex = /([A-D])\)\s*/g;
+        const optionRegex = /([A-F])\)\s*/g;
         const matches = Array.from(condensed.matchAll(optionRegex));
         if (!matches.length) {
             return null;
