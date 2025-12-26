@@ -2391,9 +2391,6 @@ valores.
         "cual", "quien", "quienes", "este", "esta", "estos", "estas",
     ]);
 
-    const questionBank = buildQuestionBank(rawQuestionBank, rawTheoryText);
-    const distractorPool = buildDistractorPool(questionBank);
-
     const state = {
         questions: [],
         currentIndex: 0,
@@ -2484,6 +2481,10 @@ valores.
             ],
         },
     ];
+
+    // Construir el banco una vez que las reglas ya están disponibles.
+    const questionBank = buildQuestionBank(rawQuestionBank, rawTheoryText);
+    const distractorPool = buildDistractorPool(questionBank);
 
     function categorizeQuestion(text) {
         const normalized = normalizeText(text);
