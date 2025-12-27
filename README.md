@@ -30,6 +30,7 @@ Simulador web para guardias de seguridad Nivel II. Construido con Next.js (App R
 ## Notas
 - El antiguo `index.html` permanece sólo como referencia; la aplicación activa usa la estructura Next.js descrita arriba.
 - Si actualizas el banco o la teoría, edita los `.txt` en `public/data/` y la lógica los recargará en el cliente.
+- GitHub Pages sirve la exportación estática generada por Next.js (`out/`); el `index.html` raíz no participa en el despliegue.
 
 ## Hashtags y SEO
 - Hashtags: #EntrenamientoSeguridad #GuardiaNivel2 #SimuladorExamen #CapacitacionSeguridad #LicenciaSeguridad

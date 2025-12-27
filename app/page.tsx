@@ -17,8 +17,15 @@ type Feedback = {
     text: string;
 };
 
+const BASE_PATH = process.env.NEXT_PUBLIC_BASE_PATH || "";
+
+function withBasePath(path: string) {
+    const normalized = path.startsWith("/") ? path : `/${path}`;
+    return `${BASE_PATH}${normalized}`;
+}
+
 async function fetchText(path: string) {
-    const res = await fetch(path);
+    const res = await fetch(withBasePath(path));
     if (!res.ok) {
         throw new Error(`No se pudo cargar ${path}`);
     }
