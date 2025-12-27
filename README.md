@@ -1,41 +1,26 @@
-# entrenador-nivel-2
+# entrenador-nivel-2 (Next.js)
 
-Entrenador web para guardias de seguridad Nivel II. Genera un cuestionario con todo el banco oficial de preguntas y retroalimenta con teoría del manual cuando hay errores.
+Simulador web para guardias de seguridad Nivel II. Construido con Next.js (App Router) para servir el banco oficial de preguntas, aleatorizar opciones y mostrar fundamentos teóricos al fallar.
+
+## Arquitectura
+- `app/`: páginas y layout. `app/page.tsx` es el simulador (cliente) y `app/layout.tsx` define el shell global.
+- `app/globals.css`: hoja de estilos global extraída del HTML original.
+- `lib/quiz.ts`: lógica de parseo, categorización, aleatorización y generación de feedback.
+- `public/data/question-bank.txt` y `public/data/theory.txt`: banco completo de preguntas y teoría (texto plano). Se cargan en el cliente al iniciar.
+- `next.config.mjs`, `tsconfig.json`: configuración de Next/TypeScript.
 
 ## Uso
+1. Instala dependencias: `npm install`.
+2. Desarrollo: `npm run dev` y abre `http://localhost:3000`.
+3. Producción: `npm run build` y luego `npm start`.
 
-- Abre `index.html` en tu navegador (no requiere servidor ni dependencias).
-- Pulsa **Iniciar Entrenamiento**.
-- Responde: las opciones se aleatorizan en cada carga.
-- Si fallas: se marca en rojo, se resalta la opción correcta y aparece el fundamento teórico.
-- El puntaje mínimo de aprobación es 80%.
+## Flujo del simulador
+- Pantalla inicial con reglas y botón **Iniciar Entrenamiento**.
+- El banco se carga, se aleatoriza el orden de preguntas y opciones, y se rellenan distractores.
+- Al contestar se bloquean opciones, se marca la correcta, y si fallas se muestra el fundamento teórico localizado en el material.
+- Nota mínima de aprobación: 80% (se calcula según total de preguntas).
+- Pantalla de resultado con botones para reiniciar o volver al inicio.
 
-## Estructura
-
-- `index.html`: HTML/CSS/JS inline. Incluye:
-  - Banco de preguntas en `<script type="text/plain" id="question-bank-raw">`.
-  - Teoría completa en `<script type="text/plain" id="theory-raw">`.
-  - Lógica JS para parsear, aleatorizar y mostrar feedback.
-  - Estilos propios + Bootstrap para responsive sin scroll horizontal.
-
-## Guía rápida de diseño (UI/UX)
-
-- Usar la paleta existente (`--primary` azul, `--secondary` dorado) para mantener coherencia visual.
-- Mantener padding horizontal en móviles (`px-3` o más) para evitar texto pegado a los bordes.
-- Evitar overflow horizontal; verificar que textos largos tengan `overflow-wrap:anywhere`.
-- Botones: `btn` principal en azul; `btn-restart` en rojo.
-- Tipografía: sistema (Segoe UI / Roboto / Helvetica / Arial).
-
-## Notas técnicas
-
-- Aleatorización de preguntas/opciones con `crypto.getRandomValues` cuando está disponible.
-- Parseo robusto de preguntas/alternativas desde el bloque de texto plano (busca `ANSWER:`).
-- Las respuestas correctas y la justificación se muestran siempre que se falle.
-- Las preguntas se categorizan automáticamente por módulo según palabras clave del enunciado.
-
-## Desarrollo
-
-No hay dependencias ni build steps. Si necesitas ajustar contenido:
-- Edita el bloque `question-bank-raw` para actualizar o añadir preguntas.
-- Edita el bloque `theory-raw` si cambia el material de referencia.
-- La lógica está al final del archivo en el script principal.
+## Notas
+- El antiguo `index.html` permanece sólo como referencia; la aplicación activa usa la estructura Next.js descrita arriba.
+- Si actualizas el banco o la teoría, edita los `.txt` en `public/data/` y la lógica los recargará en el cliente.
