@@ -6,7 +6,7 @@ Simulador web para guardias de seguridad Nivel II. Construido con Next.js (App R
 
 ## Arquitectura
 - `app/`: páginas y layout. `app/page.tsx` es el simulador (cliente) y `app/layout.tsx` define el shell global.
-- `app/globals.css`: hoja de estilos global extraída del HTML original.
+- `app/globals.css`: hoja de estilos global (con footer con enlace a Instagram de freudiandev).
 - `lib/quiz.ts`: lógica de parseo, categorización, aleatorización y generación de feedback.
 - `public/data/question-bank.txt` y `public/data/theory.txt`: banco completo de preguntas y teoría (texto plano). Se cargan en el cliente al iniciar.
 - `next.config.mjs`, `tsconfig.json`: configuración de Next/TypeScript.
@@ -17,6 +17,12 @@ Simulador web para guardias de seguridad Nivel II. Construido con Next.js (App R
 - TypeScript 5.9
 - ESLint 9 (con `eslint-config-next`)
 
+## Características recientes
+- Feedback ampliado: muestra el fragmento completo de teoría y la sección del manual (módulo/unidad) donde se respalda la respuesta.
+- Export estática preparada para GitHub Pages con `basePath` `/entrenador-nivel-2`.
+- Footer global con crédito “programado por freudiandev” y enlace a Instagram.
+- Dockerfile listo con Nginx para servir la exportación (`out/`) en cualquier entorno.
+
 ## Despliegue (GitHub Pages)
 - Producción pública: https://freudiandev.github.io/entrenador-nivel-2/
 - Empuja a `main` para actualizar el sitio; el flujo de despliegue toma la versión actual y la sirve en GitHub Pages.
@@ -26,11 +32,13 @@ Simulador web para guardias de seguridad Nivel II. Construido con Next.js (App R
 1. Instala dependencias: `npm install`.
 2. Desarrollo: `npm run dev` y abre `http://localhost:3000`.
 3. Producción: `npm run build` y luego `npm start`.
+4. Export con basePath (como en Pages): `GITHUB_ACTIONS=true npm run build` (genera `out/`).
+5. Lint: `npm run lint`.
 
 ## Flujo del simulador
 - Pantalla inicial con reglas y botón **Iniciar Entrenamiento**.
 - El banco se carga, se aleatoriza el orden de preguntas y opciones, y se rellenan distractores.
-- Al contestar se bloquean opciones, se marca la correcta, y si fallas se muestra el fundamento teórico localizado en el material.
+- Al contestar se bloquean opciones, se marca la correcta, y si fallas se muestra el fundamento teórico completo, indicando la sección del manual donde está la respuesta.
 - Nota mínima de aprobación: 80% (se calcula según total de preguntas).
 - Pantalla de resultado con botones para reiniciar o volver al inicio.
 
