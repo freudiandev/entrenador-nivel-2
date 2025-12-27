@@ -209,28 +209,56 @@ function extractKeywords(text: string) {
         .slice(0, 8);
 }
 
-function extractSnippet(text: string, idx: number) {
-    let start = text.lastIndexOf("\n", idx);
-    let end = text.indexOf("\n", idx);
-    if (start === -1) {
-        start = 0;
-    } else {
-        start += 1;
-    }
-    if (end === -1) {
-        end = text.length;
-    }
-    let snippet = text.slice(start, end).trim();
-    if (snippet.length < 40) {
-        const nextEnd = text.indexOf("\n", end + 1);
-        if (nextEnd !== -1) {
-            snippet = text.slice(start, nextEnd).trim();
+function findNearestSectionHeading(lines: string[], startLine: number) {
+    const headingRegex =
+        /(M[ÓO]DULO\s+[IVXLCDM]+[^a-z]*|UNIDAD\s+[IVXLCDM]+[^a-z]*|CAP[IÍ]TULO[^a-z]*|MARCO DE REFERENCIA|OBJETIVOS?)/i;
+    for (let i = startLine; i >= 0; i -= 1) {
+        const raw = lines[i].trim();
+        if (!raw) continue;
+        const normalized = raw
+            .normalize("NFD")
+            .replace(/[\u0300-\u036f]/g, "")
+            .toUpperCase();
+        if (headingRegex.test(normalized)) {
+            return raw;
         }
     }
-    if (snippet.length > 700) {
-        snippet = `${snippet.slice(0, 700).trim()}...`;
+    return null;
+}
+
+function extractSnippet(text: string, idx: number) {
+    const lines = text.split("\n");
+    const preText = text.slice(0, idx);
+    const startLine = preText.split("\n").length - 1;
+
+    // Encuentra límites de párrafo (línea vacía) y agrega contexto de líneas.
+    let from = Math.max(0, startLine - 2);
+    for (let i = startLine; i >= 0; i -= 1) {
+        if (!lines[i].trim()) {
+            from = i + 1;
+            break;
+        }
     }
-    return snippet;
+
+    let to = Math.min(lines.length - 1, startLine + 6);
+    for (let i = startLine; i < lines.length; i += 1) {
+        if (!lines[i].trim()) {
+            to = i - 1;
+            break;
+        }
+        if (i - startLine >= 6) {
+            to = i;
+            break;
+        }
+    }
+
+    const snippet = lines.slice(from, to + 1).join("\n").trim();
+    const section = findNearestSectionHeading(lines, startLine);
+
+    if (section && snippet) {
+        return `Sección: ${section}\n${snippet}`;
+    }
+    return snippet || THEORY_FALLBACK;
 }
 
 function findTheorySnippet(
