@@ -14,7 +14,19 @@ export default function RootLayout({
 }) {
     return (
         <html lang="es">
-            <body>{children}</body>
+            <body>
+                {children}
+                <footer className="site-footer">
+                    <span>Sitio web programado por </span>
+                    <a
+                        href="https://instagram.com/freudiandev"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                    >
+                        freudiandev
+                    </a>
+                </footer>
+            </body>
         </html>
     );
 }
