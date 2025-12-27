@@ -1,5 +1,7 @@
 # entrenador-nivel-2 (Next.js)
 
+[Visita el sitio desplegado en GitHub Pages](https://freudiandev.github.io/entrenador-nivel-2/) y pon a prueba el simulador en línea.
+
 Simulador web para guardias de seguridad Nivel II. Construido con Next.js (App Router) para servir el banco oficial de preguntas, aleatorizar opciones y mostrar fundamentos teóricos al fallar.
 
 ## Arquitectura
@@ -8,6 +10,10 @@ Simulador web para guardias de seguridad Nivel II. Construido con Next.js (App R
 - `lib/quiz.ts`: lógica de parseo, categorización, aleatorización y generación de feedback.
 - `public/data/question-bank.txt` y `public/data/theory.txt`: banco completo de preguntas y teoría (texto plano). Se cargan en el cliente al iniciar.
 - `next.config.mjs`, `tsconfig.json`: configuración de Next/TypeScript.
+
+## Despliegue (GitHub Pages)
+- Producción pública: https://freudiandev.github.io/entrenador-nivel-2/
+- Empuja a `main` para actualizar el sitio; el flujo de despliegue toma la versión actual y la sirve en GitHub Pages.
 
 ## Uso
 1. Instala dependencias: `npm install`.
@@ -24,3 +30,7 @@ Simulador web para guardias de seguridad Nivel II. Construido con Next.js (App R
 ## Notas
 - El antiguo `index.html` permanece sólo como referencia; la aplicación activa usa la estructura Next.js descrita arriba.
 - Si actualizas el banco o la teoría, edita los `.txt` en `public/data/` y la lógica los recargará en el cliente.
+
+## Hashtags y SEO
+- Hashtags: #EntrenamientoSeguridad #GuardiaNivel2 #SimuladorExamen #CapacitacionSeguridad #LicenciaSeguridad
+- Palabras clave: simulador guardia de seguridad, preguntas nivel II, banco de preguntas, teoría seguridad privada, entrenamiento online
