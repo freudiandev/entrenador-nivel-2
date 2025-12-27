@@ -11,9 +11,16 @@ Simulador web para guardias de seguridad Nivel II. Construido con Next.js (App R
 - `public/data/question-bank.txt` y `public/data/theory.txt`: banco completo de preguntas y teoría (texto plano). Se cargan en el cliente al iniciar.
 - `next.config.mjs`, `tsconfig.json`: configuración de Next/TypeScript.
 
+## Tecnologías
+- Next.js 16
+- React 19
+- TypeScript 5.9
+- ESLint 9 (con `eslint-config-next`)
+
 ## Despliegue (GitHub Pages)
 - Producción pública: https://freudiandev.github.io/entrenador-nivel-2/
 - Empuja a `main` para actualizar el sitio; el flujo de despliegue toma la versión actual y la sirve en GitHub Pages.
+- La exportación estática usa `basePath` `/entrenador-nivel-2` (se activa automáticamente en GitHub Actions con `GITHUB_ACTIONS=true`).
 
 ## Uso
 1. Instala dependencias: `npm install`.
@@ -28,9 +35,14 @@ Simulador web para guardias de seguridad Nivel II. Construido con Next.js (App R
 - Pantalla de resultado con botones para reiniciar o volver al inicio.
 
 ## Notas
-- El antiguo `index.html` permanece sólo como referencia; la aplicación activa usa la estructura Next.js descrita arriba.
+- El antiguo `index.html` fue retirado para evitar confusiones; la raíz del proyecto es la app de Next.js.
 - Si actualizas el banco o la teoría, edita los `.txt` en `public/data/` y la lógica los recargará en el cliente.
 - GitHub Pages sirve la exportación estática generada por Next.js (`out/`); el `index.html` raíz no participa en el despliegue.
+
+## Docker
+1. Construir la imagen: `docker build -t entrenador-nivel-2 .`
+2. Ejecutar el contenedor: `docker run -p 8080:80 entrenador-nivel-2`
+3. Abre `http://localhost:8080` para usar el simulador (sirve la exportación estática de Next.js).
 
 ## Hashtags y SEO
 - Hashtags: #EntrenamientoSeguridad #GuardiaNivel2 #SimuladorExamen #CapacitacionSeguridad #LicenciaSeguridad
